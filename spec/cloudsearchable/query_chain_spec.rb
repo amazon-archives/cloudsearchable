@@ -4,26 +4,6 @@ require 'test_classes/cloud_searchable_test_class'
 describe Cloudsearchable::Query do
   let(:clazz){ CloudSearchableSampleClassFactory.call }
 
-  it 'can build a simple search query' do
-    clazz.search.where(:customer_id, :eq, 12345).query.to_q[:bq].should =~ /customer_id:'12345'/
-  end
-
-  it 'chains' do
-    query = clazz.search.where(customer_id: 12345).where(helpfulness: 42).query.to_q[:bq]
-    query.should =~ /customer_id:'12345'/
-    query.should =~ /helpfulness:'42'/
-  end
-
-  it 'can build a query with "not equal to" condition' do
-    query = clazz.search.where(:customer_id, :!=, 1234).query.to_q[:bq].should =~ /\(not customer_id:'1234'\)/
-  end
-
-  it 'can build a query from a hash' do
-    query = clazz.search.where(customer_id: 12345, helpfulness: 42).query.to_q[:bq]
-    query.should =~ /customer_id:'12345'/
-    query.should =~ /helpfulness:'42'/
-  end
-
   it "doesn't build queries without a query term" do
     expect do
       query = clazz.search.limit(10).query.to_q
@@ -31,40 +11,78 @@ describe Cloudsearchable::Query do
   end
 
   describe '#where' do
-    describe 'uint data type' do
-      describe 'within_range' do
-        it 'supports range query with uint fields' do
-          clazz.search.where(:helpfulness, :within_range, "0..#{123}").query.to_q[:bq].should =~ /helpfulness:0..123/
-        end
+    it 'can build a simple search query' do
+      clazz.search.where(:customer_id, :eq, 12345).query.to_q[:bq].should =~ /customer_id:12345/
+    end
 
-        it 'supports range query with uint fields using a ruby range' do
-          clazz.search.where(:helpfulness, :within_range, 0..123).query.to_q[:bq].should =~ /helpfulness:0..123/
-        end
+    it 'chains' do
+      query = clazz.search.where(customer_id: 12345).where(helpfulness: 42).query.to_q[:bq]
+      query.should =~ /customer_id:12345/
+      query.should =~ /helpfulness:42/
+    end
+
+    it 'can build a query with "not equal to" condition' do
+      query = clazz.search.where(:customer_id, :!=, 1234).query.to_q[:bq].should =~ /\(not customer_id:1234\)/
+    end
+
+    it 'can build a query from a hash' do
+      query = clazz.search.where(customer_id: 12345, helpfulness: 42).query.to_q[:bq]
+      query.should =~ /customer_id:12345/
+      query.should =~ /helpfulness:42/
+    end
+
+    context 'literal data type' do
+      it 'supports equality' do
+        clazz.search.where(:someliteral, :==, 'ABC').query.to_q[:bq].should eq "someliteral:'ABC'"
       end
 
-      describe 'inequalities' do
-        it 'supports greater-than with uint fields' do
-          clazz.search.where(:helpfulness, :>, 123).query.to_q[:bq].should =~ /helpfulness:124../
-        end
+      it 'supports :any' do
+        clazz.search.where(:k, :any, ['ABC', 'DEF']).query.to_q[:bq].should eq "(or k:'ABC' k:'DEF')"
+      end
+    end
 
-        it 'supports greater-than-or-equal-to with uint fields' do
-          clazz.search.where(:helpfulness, :>=, 123).query.to_q[:bq].should =~ /helpfulness:123../
-        end
+    context 'uint data type' do
+      it 'supports range query' do
+        clazz.search.where(:helpfulness, :within_range, "0..#{123}").query.to_q[:bq].should =~ /helpfulness:0..123/
+      end
 
-        it 'supports less-than with uint fields' do
-          clazz.search.where(:helpfulness, :<, 123).query.to_q[:bq].should =~ /helpfulness:..122/
-        end
+      it 'supports range query using a ruby range' do
+        clazz.search.where(:helpfulness, :within_range, 0..123).query.to_q[:bq].should =~ /helpfulness:0..123/
+      end
 
-        it 'supports less-than-or-equal-to with uint fields' do
-          clazz.search.where(:helpfulness, :<=, 123).query.to_q[:bq].should =~ /helpfulness:..123/
-        end
+      it 'supports equality' do
+        clazz.search.where(:helpfulness, :==, 123).query.to_q[:bq].should eq 'helpfulness:123'
+      end
 
-        it 'does not permit inequality operators with non-integer fields' do
-          [:>, :>=, :<, :<=].each do |op|
-            ['123', nil, 12.0].each do |value|
-              expect { clazz.search.where(:helpfulness, op, value).query.to_q[:bq] }.to raise_error
-            end
-          end
+      it 'supports not-equality' do
+        clazz.search.where(:helpfulness, :!=, 123).query.to_q[:bq].should eq '(not helpfulness:123)'
+      end
+
+      it 'supports greater-than' do
+        clazz.search.where(:helpfulness, :>, 123).query.to_q[:bq].should =~ /helpfulness:124../
+      end
+
+      it 'supports greater-than-or-equal-to' do
+        clazz.search.where(:helpfulness, :>=, 123).query.to_q[:bq].should =~ /helpfulness:123../
+      end
+
+      it 'supports less-than' do
+        clazz.search.where(:helpfulness, :<, 123).query.to_q[:bq].should =~ /helpfulness:..122/
+      end
+
+      it 'supports less-than-or-equal-to' do
+        clazz.search.where(:helpfulness, :<=, 123).query.to_q[:bq].should =~ /helpfulness:..123/
+      end
+
+      it 'supports :any' do
+        clazz.search.where(:k, :any, [123, 456]).query.to_q[:bq].should eq '(or k:123 k:456)'
+      end
+    end
+
+    it 'does not permit inequality operators with non-integer types' do
+      [:>, :>=, :<, :<=].each do |op|
+        ['123', nil, 12.0].each do |value|
+          expect { clazz.search.where(:helpfulness, op, value).query.to_q[:bq] }.to raise_error
         end
       end
     end

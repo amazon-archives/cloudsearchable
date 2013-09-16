@@ -36,6 +36,9 @@ module Cloudsearchable
     #
     #   Collection.search.where(:customer_id, :==, 12345)
     #
+    # The value you provide must be of the same type as the field.  For text and literal
+    # values, provide a string value.  For uint fields, provide a numeric value.
+    #
     # To search for any of several possible values for a field, use the :any operator:
     #
     #   Collection.search.where(:product_group, :any, %w{gl_kitchen gl_grocery})
@@ -56,11 +59,11 @@ module Cloudsearchable
         @clauses << if op == :within_range
                       "#{field}:#{value.to_s}"
                     elsif op == :== || op == :eq
-                      "#{field}:'#{value.to_s}'"
+                      "#{field}:#{value_to_query_string(value)}"
                     elsif op == :any
-                      '(or ' + value.map { |v| "#{field}:'#{v.to_s}'" }.join(' ') + ')'
+                      '(or ' + value.map { |v| "#{field}:#{value_to_query_string(v)}" }.join(' ') + ')'
                     elsif op == :!=
-                      "(not #{field}:'#{value.to_s}')"
+                      "(not #{field}:#{value_to_query_string(value)})"
                     elsif op == :> && value.is_a?(Integer)
                       "#{field}:#{value+1}.."
                     elsif op == :< && value.is_a?(Integer)
@@ -70,7 +73,7 @@ module Cloudsearchable
                     elsif op == :<= && value.is_a?(Integer)
                       "#{field}:..#{value}"
                     else
-                      raise "op #{op} is unrecognized"
+                      raise "op #{op} is unrecognized for value #{value} of type #{value.class}"
                     end
       else
         raise "field_or_hash must be a Hash or Symbol, not a #{field_or_hash.class}"
@@ -213,6 +216,12 @@ module Cloudsearchable
         start: @offset,
         :'return-fields' => @fields.reduce("") { |s,f| s << f.to_s }
       }
+    end
+
+    private
+
+    def value_to_query_string(value)
+      value.is_a?(Integer) ? value.to_s : "'#{value.to_s}'"
     end
   end
 end
