@@ -204,7 +204,7 @@ module Cloudsearchable
     def to_q
       raise NoClausesError, "no search terms were specified" if (@clauses.nil? || @clauses.empty?) && (@q.nil? || @q.empty?)
       
-      bq = (@clauses.count > 0) ? "(and #{@clauses.join(' ')})" : @clauses.first
+      bq = (@clauses.count > 1) ? "(and #{@clauses.join(' ')})" : @clauses.first
       {
         q: @q,
         bq: bq,
