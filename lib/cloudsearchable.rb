@@ -8,6 +8,7 @@ require 'cloudsearchable/config'
 
 require 'active_support/inflector'
 require 'active_support/core_ext/string'
+require 'active_support/notifications'
 
 module Cloudsearchable
   def self.configure
