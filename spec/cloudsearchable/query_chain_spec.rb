@@ -12,7 +12,7 @@ describe Cloudsearchable::Query do
 
   describe '#where' do
     it 'can build a simple search query' do
-      clazz.search.where(:customer_id, :eq, 12345).query.to_q[:bq].should =~ /customer_id:12345/
+      clazz.search.where(:customer_id, :eq, 'A1234').query.to_q[:bq].should =~ /customer_id:'A1234'/
     end
 
     it 'rejects field names that were not defined in the index' do
@@ -20,18 +20,18 @@ describe Cloudsearchable::Query do
     end
 
     it 'chains' do
-      query = clazz.search.where(customer_id: 12345).where(helpfulness: 42).query.to_q[:bq]
-      query.should =~ /customer_id:12345/
+      query = clazz.search.where(customer_id: 'A1234').where(helpfulness: 42).query.to_q[:bq]
+      query.should =~ /customer_id:'A1234'/
       query.should =~ /helpfulness:42/
     end
 
     it 'can build a query with "not equal to" condition' do
-      query = clazz.search.where(:customer_id, :!=, 1234).query.to_q[:bq].should =~ /\(not customer_id:1234\)/
+      query = clazz.search.where(:customer_id, :!=, 'A1234').query.to_q[:bq].should =~ /\(not customer_id:'A1234'\)/
     end
 
     it 'can build a query from a hash' do
-      query = clazz.search.where(customer_id: 12345, helpfulness: 42).query.to_q[:bq]
-      query.should =~ /customer_id:12345/
+      query = clazz.search.where(customer_id: 'A1234', helpfulness: 42).query.to_q[:bq]
+      query.should =~ /customer_id:'A1234'/
       query.should =~ /helpfulness:42/
     end
 
@@ -42,6 +42,14 @@ describe Cloudsearchable::Query do
 
       it 'supports :any' do
         clazz.search.where(:customer_id, :any, ['ABC', 'DEF']).query.to_q[:bq].should eq "(or customer_id:'ABC' customer_id:'DEF')"
+      end
+
+      it 'accepts a value as an integer' do
+        clazz.search.where(customer_id: 123).query.to_q[:bq].should =~ /customer_id:'123'/
+      end
+
+      it 'rejects nil value' do
+        expect { clazz.search.where(customer_id: nil) }.to raise_exception
       end
     end
 
@@ -81,12 +89,22 @@ describe Cloudsearchable::Query do
       it 'supports :any' do
         clazz.search.where(:helpfulness, :any, [123, 456]).query.to_q[:bq].should eq '(or helpfulness:123 helpfulness:456)'
       end
+
+      it 'accepts a value as a string' do
+        clazz.search.where(helpfulness: '123').query.to_q[:bq].should =~ /helpfulness:123/
+      end
+
+      [Object.new, nil, '123a'].each do |v|
+        it "rejects value #{v} of type #{v.class}" do
+          expect { clazz.search.where(helpfulness: v) }.to raise_exception
+        end
+      end
     end
 
-    it 'does not permit inequality operators with non-integer types' do
-      [:>, :>=, :<, :<=].each do |op|
-        ['123', nil, 12.0].each do |value|
-          expect { clazz.search.where(:helpfulness, op, value).query.to_q[:bq] }.to raise_error
+    [:>, :>=, :<, :<=].each do |op|
+      [Object.new, nil, '123a'].each do |v|
+        it "does not permit op #{op} on value #{v} of type #{v.class}" do
+          expect { clazz.search.where(:helpfulness, op, v).query.to_q[:bq] }.to raise_error
         end
       end
     end

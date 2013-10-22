@@ -55,29 +55,10 @@ module Cloudsearchable
           where(k, :==, v)
         end
       elsif field_or_hash.is_a? Symbol
-        if domain.fields[field_or_hash.to_sym].nil?
+        if (field = domain.fields[field_or_hash.to_sym]).nil?
           raise "cannot query on field '#{field_or_hash}' because it is not a member of this index"
         end
-        field = field_or_hash
-        @clauses << if op == :within_range
-                      "#{field}:#{value.to_s}"
-                    elsif op == :== || op == :eq
-                      "#{field}:#{value_to_query_string(value)}"
-                    elsif op == :any
-                      '(or ' + value.map { |v| "#{field}:#{value_to_query_string(v)}" }.join(' ') + ')'
-                    elsif op == :!=
-                      "(not #{field}:#{value_to_query_string(value)})"
-                    elsif op == :> && value.is_a?(Integer)
-                      "#{field}:#{value+1}.."
-                    elsif op == :< && value.is_a?(Integer)
-                      "#{field}:..#{value-1}"
-                    elsif op == :>= && value.is_a?(Integer)
-                      "#{field}:#{value}.."
-                    elsif op == :<= && value.is_a?(Integer)
-                      "#{field}:..#{value}"
-                    else
-                      raise "op #{op} is unrecognized for value #{value} of type #{value.class}"
-                    end
+        @clauses << clause_for(field_or_hash, field.type, op, value)
       else
         raise "field_or_hash must be a Hash or Symbol, not a #{field_or_hash.class}"
       end
@@ -223,8 +204,52 @@ module Cloudsearchable
 
     private
 
-    def value_to_query_string(value)
-      value.is_a?(Integer) ? value.to_s : "'#{value.to_s}'"
+    def clause_for(field, type, op, value)
+      # Operations for which 'value' is not a scalar
+      if op == :any
+        '(or ' + value.map { |v| "#{field}:#{query_clause_value(type, v)}" }.join(' ') + ')'
+      elsif op == :within_range && type == :uint
+        "#{field}:#{value.to_s}"
+      else
+        value = query_clause_value(type, value)
+
+        # Some operations are applicable to all types.
+        case op
+          when :==, :eq
+            "#{field}:#{value}"
+          when :!=
+            "(not #{field}:#{value})"
+          else
+            # Operation-specific, type-specific operations on scalars
+            case type
+              when :uint
+                case op
+                  when :>
+                    "#{field}:#{value+1}.."
+                  when :<
+                    "#{field}:..#{value-1}"
+                  when :>=
+                    "#{field}:#{value}.."
+                  when :<=
+                    "#{field}:..#{value}"
+                  else
+                    raise "op #{op} is unrecognized for value #{value} of type #{type}"
+                end
+              else
+                raise "op #{op} is unrecognized for value #{value} of type #{type}"
+            end
+        end
+      end
+    end
+
+    def query_clause_value(type, value)
+      if type == :uint
+        Integer(value)
+      elsif !value.nil?
+        "'#{value.to_s}'"
+      else
+        raise "Value #{value} cannot be converted to query string on type #{type}"
+      end
     end
   end
 end
