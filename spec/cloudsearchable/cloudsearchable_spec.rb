@@ -5,7 +5,7 @@ describe Cloudsearchable do
   let(:clazz){ CloudSearchableSampleClassFactory.call }
 
   it 'can describe an index that returns ids for the class type' do
-    test_index = clazz.cloudsearch_index(:test_index)
+    test_index = clazz.cloudsearch_index
     test_index.should be_kind_of(Cloudsearchable::Domain)
     test_index.fields.should have(4).items #3 explicit + 1 for the id of the object
   end
@@ -33,7 +33,7 @@ describe Cloudsearchable do
     end
 
     it 'supplies the right values to the fields' do
-      test_index = clazz.cloudsearch_index(:test_index)
+      test_index = clazz.cloudsearch_index
       test_index.fields[:test_class_id].value_for(inst).should be(inst.id)
       test_index.fields[:customer_id].value_for(inst).should   be(inst.customer)
       test_index.fields[:test_name].value_for(inst).should     be(inst.name)
@@ -47,7 +47,7 @@ describe Cloudsearchable do
     end
     
     it 'generates a sensible addition sdf document' do
-      sdf = clazz.cloudsearch_index(:test_index).send :addition_sdf, inst, inst.id, inst.lock_version
+      sdf = clazz.cloudsearch_index.send :addition_sdf, inst, inst.id, inst.lock_version
       sdf[:fields][:helpfulness].should be(1234)
     end
   end

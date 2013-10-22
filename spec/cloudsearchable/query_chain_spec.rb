@@ -15,6 +15,10 @@ describe Cloudsearchable::Query do
       clazz.search.where(:customer_id, :eq, 12345).query.to_q[:bq].should =~ /customer_id:12345/
     end
 
+    it 'rejects field names that were not defined in the index' do
+      expect { clazz.search.where(:mispeled_field, :eq, 12345) }.to raise_exception
+    end
+
     it 'chains' do
       query = clazz.search.where(customer_id: 12345).where(helpfulness: 42).query.to_q[:bq]
       query.should =~ /customer_id:12345/
@@ -33,11 +37,11 @@ describe Cloudsearchable::Query do
 
     context 'literal data type' do
       it 'supports equality' do
-        clazz.search.where(:someliteral, :==, 'ABC').query.to_q[:bq].should eq "someliteral:'ABC'"
+        clazz.search.where(:customer_id, :==, 'ABC').query.to_q[:bq].should eq "customer_id:'ABC'"
       end
 
       it 'supports :any' do
-        clazz.search.where(:k, :any, ['ABC', 'DEF']).query.to_q[:bq].should eq "(or k:'ABC' k:'DEF')"
+        clazz.search.where(:customer_id, :any, ['ABC', 'DEF']).query.to_q[:bq].should eq "(or customer_id:'ABC' customer_id:'DEF')"
       end
     end
 
@@ -75,7 +79,7 @@ describe Cloudsearchable::Query do
       end
 
       it 'supports :any' do
-        clazz.search.where(:k, :any, [123, 456]).query.to_q[:bq].should eq '(or k:123 k:456)'
+        clazz.search.where(:helpfulness, :any, [123, 456]).query.to_q[:bq].should eq '(or helpfulness:123 helpfulness:456)'
       end
     end
 
@@ -90,7 +94,7 @@ describe Cloudsearchable::Query do
 
 
   it 'supports querying for any of several values of a field' do
-    clazz.search.where(:category, :any, %w{big small}).query.to_q[:bq].should include("(or category:'big' category:'small')")
+    clazz.search.where(:test_name, :any, %w{big small}).query.to_q[:bq].should include("(or test_name:'big' test_name:'small')")
   end
 
   it 'supports text method' do
@@ -99,9 +103,9 @@ describe Cloudsearchable::Query do
   end
 
   it 'supports chaining text and where clauses together' do
-    query = clazz.search.text('test').where(:featured, :==, 'f').query
+    query = clazz.search.text('test').where(:helpfulness, :==, 123).query
     query.to_q[:q].should  =~ /test/
-    query.to_q[:bq].should =~ /featured:'f'/
+    query.to_q[:bq].should =~ /helpfulness:123/
   end
 
   it 'supports ordering with a rank expression' do

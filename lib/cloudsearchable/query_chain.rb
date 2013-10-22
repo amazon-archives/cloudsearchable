@@ -55,6 +55,9 @@ module Cloudsearchable
           where(k, :==, v)
         end
       elsif field_or_hash.is_a? Symbol
+        if domain.fields[field_or_hash.to_sym].nil?
+          raise "cannot query on field '#{field_or_hash}' because it is not a member of this index"
+        end
         field = field_or_hash
         @clauses << if op == :within_range
                       "#{field}:#{value.to_s}"
