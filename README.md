@@ -14,12 +14,6 @@ class Customer
   
   # This is the default index. You probably only need one.
   index_in_cloudsearch do |idx|
-    literal :id,          :searchable => true
-  end
-
-  # A named index.
-  index_in_cloudsearch :test_index do |idx|
-  
     # Fetch the customer_id field from customer
     literal :customer_id, :returnable => true,  :searchable => true, :source => Proc.new { customer }
 
@@ -28,6 +22,11 @@ class Customer
 
     # uint fields can be used in result ranking functions
     uint    :helpfulness, :returnable => true,  :searchable => false do; 1234 end
+  end
+
+  # A named index.
+  index_in_cloudsearch :test_index do |idx|
+    literal :id,          :searchable => true
   end
 end
 ```
