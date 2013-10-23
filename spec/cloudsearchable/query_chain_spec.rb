@@ -145,16 +145,16 @@ describe Cloudsearchable::Query do
                 "found" => 285,
                 "start" => 0,
                 "hit" => [
-                    {"id" => "40bdd5072b6dbae6245fe4ee837d22e3","data" => {"collection_item_id" => ["PCxSz65GIcZTtc0UpRdT-i--w-1365550370"]}},
-                    {"id" => "00af8f5f96aa1db7aff77be5651b3bb1","data" => {"collection_item_id" => ["PCxhksJTLRYnoGXvwZik82Fkw-1365020313"]}},
-                    {"id" => "00b6ac84e3ae402e7698959bf692a53e","data" => {"collection_item_id" => ["PCxs-fIVZnBcTzZ4MtfDguS1A-1365020274"]}},
-                    {"id" => "018fdee653bff74abd12ac30152a2837","data" => {"collection_item_id" => ["PCxmAGHFtAgyqUrgI3HgM_P6Q-1365548349"]}},
-                    {"id" => "01d062d24c389906eea2d16b8193eb56","data" => {"collection_item_id" => ["PCxqjaTmwydKM82NqymbryNfg-1365470479"]}},
-                    {"id" => "01e3ee5d848a30385a4e90eb851b094d","data" => {"collection_item_id" => ["PCxSz65GIcZTtc0UpRdT-i--w-1365550369"]}},
-                    {"id" => "01fca44cc596adb295ca6ee9f9f36499","data" => {"collection_item_id" => ["PCx7XKbKwOVf1VvEWvTl5c1Eg-1365020176"]}},
-                    {"id" => "02b85c9835b5045065ee389954a60c5f","data" => {"collection_item_id" => ["PCxp_xid_WeTfTmb5MySEfxhQ-1365115565"]}},
-                    {"id" => "040c01be434552a1d9e99eef9db87bdd","data" => {"collection_item_id" => ["PCxLOYzA4bCt7-bP6wsZnl-ow-1365020297"]}},
-                    {"id" => "048567c755e30d6d64d757508f1feaa0","data" => {"collection_item_id" => ["PCxJhhnpYkeSKrOxteQo5Jckw-1365115667"]}}
+                    {"id" => "40bdd5072b6dbae6245fe4ee837d22e3","data" => {"test_class_id" => ["PCxSz65GIcZTtc0UpRdT-i--w-1365550370"]}},
+                    {"id" => "00af8f5f96aa1db7aff77be5651b3bb1","data" => {"test_class_id" => ["PCxhksJTLRYnoGXvwZik82Fkw-1365020313"]}},
+                    {"id" => "00b6ac84e3ae402e7698959bf692a53e","data" => {"test_class_id" => ["PCxs-fIVZnBcTzZ4MtfDguS1A-1365020274"]}},
+                    {"id" => "018fdee653bff74abd12ac30152a2837","data" => {"test_class_id" => ["PCxmAGHFtAgyqUrgI3HgM_P6Q-1365548349"]}},
+                    {"id" => "01d062d24c389906eea2d16b8193eb56","data" => {"test_class_id" => ["PCxqjaTmwydKM82NqymbryNfg-1365470479"]}},
+                    {"id" => "01e3ee5d848a30385a4e90eb851b094d","data" => {"test_class_id" => ["PCxSz65GIcZTtc0UpRdT-i--w-1365550369"]}},
+                    {"id" => "01fca44cc596adb295ca6ee9f9f36499","data" => {"test_class_id" => ["PCx7XKbKwOVf1VvEWvTl5c1Eg-1365020176"]}},
+                    {"id" => "02b85c9835b5045065ee389954a60c5f","data" => {"test_class_id" => ["PCxp_xid_WeTfTmb5MySEfxhQ-1365115565"]}},
+                    {"id" => "040c01be434552a1d9e99eef9db87bdd","data" => {"test_class_id" => ["PCxLOYzA4bCt7-bP6wsZnl-ow-1365020297"]}},
+                    {"id" => "048567c755e30d6d64d757508f1feaa0","data" => {"test_class_id" => ["PCxJhhnpYkeSKrOxteQo5Jckw-1365115667"]}}
                 ]
             },
             "info" => {
@@ -183,7 +183,7 @@ describe Cloudsearchable::Query do
 
         q = query
         q.query.instance_variable_set(:@fatal_warnings, false)
-        lambda{ q.to_a }.should_not raise_error(Cloudsearchable::WarningInQueryResult)
+        lambda{ q.to_a }.should_not raise_error
       end
     end
 
