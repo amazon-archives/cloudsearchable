@@ -76,19 +76,25 @@ module Cloudsearchable
 
     # Add or replace the CloudSearch document for a particular version of a record
     def post_record record, record_id, version
-      CloudSearch.post_sdf doc_endpoint, addition_sdf(record, record_id, version)
+      ActiveSupport::Notifications.instrument('cloudsearchable.post_record') do
+        CloudSearch.post_sdf doc_endpoint, addition_sdf(record, record_id, version)
+      end
     end
 
     # Delete the CloudSearch document for a particular record (version must be greater than the last version pushed)
     def delete_record record_id, version
-      CloudSearch.post_sdf doc_endpoint, deletion_sdf(record_id, version)
+      ActiveSupport::Notifications.instrument('cloudsearchable.delete_record') do
+        CloudSearch.post_sdf doc_endpoint, deletion_sdf(record_id, version)
+      end
     end
 
     def execute_query(params)
       uri    = URI("http://#{search_endpoint}/#{CloudSearch::API_VERSION}/search")
       uri.query = URI.encode_www_form(params)
       Cloudsearchable.logger.info "CloudSearch execute: #{uri.to_s}"
-      res = Net::HTTP.get_response(uri).body
+      res = ActiveSupport::Notifications.instrument('cloudsearchable.execute_query') do
+        Net::HTTP.get_response(uri).body
+      end
       JSON.parse(res)
     end
 
@@ -124,7 +130,9 @@ module Cloudsearchable
     #
     def cloudsearch_domain(force_reload = false)
       if(force_reload || !@domain)
-        @domain = CloudSearch.client.describe_domains(:domain_names => [name])
+        @domain = ActiveSupport::Notifications.instrument('cloudsearchable.describe_domains') do
+          CloudSearch.client.describe_domains(:domain_names => [name])
+        end
       else
         @domain
       end
