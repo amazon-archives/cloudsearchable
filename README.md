@@ -81,6 +81,24 @@ Supported Options
 * config.fatal_warnings - raises WarningInQueryResult exception on warning. Defaults to false.
 * config.logger - a custom logger, defaults to Rails if defined.
 
+### ActiveSupport Notifications
+
+Requests to AWS cloudsearch are instrumented using [ActiveSupport Notifications](http://api.rubyonrails.org/classes/ActiveSupport/Notifications.html). To consume these instrumented events register a subscriber in your Application. For example, to register for getting notifications for search requests:
+
+```ruby
+  ActiveSupport::Notifications.subscribe('cloudsearchable.execute_query') do |*args|
+    event = ActiveSupport::Notifications::Event.new(*args)
+    # Your code here ...
+  end
+```
+
+#### Instrumented events:
+
+1. cloudsearchable.execute_query - Instruments search requests
+2. cloudsearchable.post_record - Instruments record addition 
+3. cloudsearchable.delete_record - Instruments record deletion
+4. cloudsearchable.describe_domains - Instruments request for getting domains information
+
 ### Other Features
 
 Cloudsearchable provides access the underlying AWS client objects, such as '''CloudSearch.client''' and '''class.cloudsearch_domains'''. For example here is how to drop domains associated with Customer class:
@@ -95,9 +113,6 @@ Cloudsearchable provides access the underlying AWS client objects, such as '''Cl
 ```
 
 See spec tests and source code for more information.
-
-## TODO:
-- use ActiveSupport instrumentation: http://edgeguides.rubyonrails.org/active_support_instrumentation.html#creating-custom-events
 
 ## Credits
 
