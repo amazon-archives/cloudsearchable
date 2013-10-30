@@ -15,18 +15,18 @@ class Customer
   # This is the default index. You probably only need one.
   index_in_cloudsearch do |idx|
     # Fetch the customer_id field from customer
-    literal :customer_id, :returnable => true,  :searchable => true, :source => Proc.new { customer }
+    literal :customer_id, :result_enabled => true,  :search_enabled => true, :source => Proc.new { customer }
 
     # Map the 'name' Ruby attribute to a field called 'test_name'
-    text    :test_name,   :returnable => false, :searchable => true, :source => :name
+    text    :test_name,   :result_enabled => false, :search_enabled => true, :source => :name
 
     # uint fields can be used in result ranking functions
-    uint    :helpfulness, :returnable => true,  :searchable => false do; 1234 end
+    uint    :helpfulness, :result_enabled => true,  :search_enabled => false do; 1234 end
   end
 
   # A named index.
   index_in_cloudsearch :test_index do |idx|
-    literal :id,          :searchable => true
+    literal :id,          :search_enabled => true
   end
 end
 ```
