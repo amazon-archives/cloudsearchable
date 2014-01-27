@@ -121,7 +121,7 @@ See spec tests and source code for more information.
 * [Lane LaRue](https://github.com/luxx)
 * [Philip White](https://github.com/philipmw)
 
-MIT License
+Apache 2.0 License
 
 ## Contributing
 
