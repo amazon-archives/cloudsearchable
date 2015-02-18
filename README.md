@@ -1,6 +1,8 @@
 # Cloudsearchable
 An ActiveRecord-style ORM query interface for AWS Cloud Search.
 
+Note: this needs to be updated to work with the cloudsearch’s [2013-01-01 API](http://docs.aws.amazon.com/cloudsearch/latest/developerguide/migrating.html). If you update the gem please submit a pull request.
+
 ## Installation
 Add to your Gemfile: gem 'cloudsearchable'. Run bundle or: gem install cloudsearchable.
 
