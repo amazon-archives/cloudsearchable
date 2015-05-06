@@ -1,4 +1,4 @@
-require 'aws-sdk'
+require 'aws-sdk-v1'
 require 'json'
 
 module CloudSearch
