@@ -8,7 +8,4 @@ $LOAD_PATH.unshift(File.dirname(__FILE__))
 require 'cloudsearchable'
 
 RSpec.configure do |rspec|
-  rspec.expect_with :rspec do |c|
-    c.warn_about_potential_false_positives = false
-  end
 end
