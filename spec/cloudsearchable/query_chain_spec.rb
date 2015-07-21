@@ -12,7 +12,8 @@ describe Cloudsearchable::Query do
 
   describe '#where' do
     it 'can build a simple search query' do
-      clazz.search.where(:customer_id, :eq, 'A1234').query.to_q[:bq].should =~ /customer_id:'A1234'/
+      query = clazz.search.where(:customer_id, :eq, 'A1234').query.to_q[:bq]
+      expect(query).to match /customer_id:'A1234'/
     end
 
     it 'rejects field names that were not defined in the index' do
@@ -21,31 +22,34 @@ describe Cloudsearchable::Query do
 
     it 'chains' do
       query = clazz.search.where(customer_id: 'A1234').where(helpfulness: 42).query.to_q[:bq]
-      query.should =~ /customer_id:'A1234'/
-      query.should =~ /helpfulness:42/
+      expect(query).to match /customer_id:'A1234'/
+      expect(query).to match /helpfulness:42/
     end
 
     it 'can build a query with "not equal to" condition' do
-      query = clazz.search.where(:customer_id, :!=, 'A1234').query.to_q[:bq].should =~ /\(not customer_id:'A1234'\)/
+      query = clazz.search.where(:customer_id, :!=, 'A1234').query.to_q[:bq]
+      expect(query).to match /\(not customer_id:'A1234'\)/
     end
 
     it 'can build a query from a hash' do
       query = clazz.search.where(customer_id: 'A1234', helpfulness: 42).query.to_q[:bq]
-      query.should =~ /customer_id:'A1234'/
-      query.should =~ /helpfulness:42/
+      expect(query).to match /customer_id:'A1234'/
+      expect(query).to match /helpfulness:42/
     end
 
     context 'literal data type' do
       it 'supports equality' do
-        clazz.search.where(:customer_id, :==, 'ABC').query.to_q[:bq].should eq "customer_id:'ABC'"
+        query = clazz.search.where(:customer_id, :==, 'ABC').query.to_q[:bq]
+        expect(query).to eq "customer_id:'ABC'"
       end
 
       it 'supports :any' do
-        clazz.search.where(:customer_id, :any, ['ABC', 'DEF']).query.to_q[:bq].should eq "(or customer_id:'ABC' customer_id:'DEF')"
+        query = clazz.search.where(:customer_id, :any, ['ABC', 'DEF']).query.to_q[:bq]
+        expect(query).to eq "(or customer_id:'ABC' customer_id:'DEF')"
       end
 
       it 'accepts a value as an integer' do
-        clazz.search.where(customer_id: 123).query.to_q[:bq].should =~ /customer_id:'123'/
+        expect(clazz.search.where(customer_id: 123).query.to_q[:bq]).to match /customer_id:'123'/
       end
 
       it 'rejects nil value' do
@@ -55,43 +59,53 @@ describe Cloudsearchable::Query do
 
     context 'uint data type' do
       it 'supports range query' do
-        clazz.search.where(:helpfulness, :within_range, "0..#{123}").query.to_q[:bq].should =~ /helpfulness:0..123/
+        query = clazz.search.where(:helpfulness, :within_range, "0..#{123}").query.to_q[:bq]
+        expect(query).to match /helpfulness:0..123/
       end
 
       it 'supports range query using a ruby range' do
-        clazz.search.where(:helpfulness, :within_range, 0..123).query.to_q[:bq].should =~ /helpfulness:0..123/
+        query = clazz.search.where(:helpfulness, :within_range, 0..123).query.to_q[:bq]
+        expect(query).to match /helpfulness:0..123/
       end
 
       it 'supports equality' do
-        clazz.search.where(:helpfulness, :==, 123).query.to_q[:bq].should eq 'helpfulness:123'
+        query = clazz.search.where(:helpfulness, :==, 123).query.to_q[:bq]
+        expect(query).to eq 'helpfulness:123'
       end
 
       it 'supports not-equality' do
-        clazz.search.where(:helpfulness, :!=, 123).query.to_q[:bq].should eq '(not helpfulness:123)'
+        query = clazz.search.where(:helpfulness, :!=, 123).query.to_q[:bq]
+        expect(query).to eq '(not helpfulness:123)'
       end
 
       it 'supports greater-than' do
-        clazz.search.where(:helpfulness, :>, 123).query.to_q[:bq].should =~ /helpfulness:124../
+        query = clazz.search.where(:helpfulness, :>, 123).query.to_q[:bq]
+        expect(query).to match /helpfulness:124../
       end
 
       it 'supports greater-than-or-equal-to' do
-        clazz.search.where(:helpfulness, :>=, 123).query.to_q[:bq].should =~ /helpfulness:123../
+        query = clazz.search.where(:helpfulness, :>=, 123).query.to_q[:bq]
+        expect(query).to match /helpfulness:123../
       end
 
       it 'supports less-than' do
-        clazz.search.where(:helpfulness, :<, 123).query.to_q[:bq].should =~ /helpfulness:..122/
+        query = clazz.search.where(:helpfulness, :<, 123).query.to_q[:bq]
+        expect(query).to match /helpfulness:..122/
       end
 
       it 'supports less-than-or-equal-to' do
-        clazz.search.where(:helpfulness, :<=, 123).query.to_q[:bq].should =~ /helpfulness:..123/
+        query = clazz.search.where(:helpfulness, :<=, 123).query.to_q[:bq]
+        expect(query).to match /helpfulness:..123/
       end
 
       it 'supports :any' do
-        clazz.search.where(:helpfulness, :any, [123, 456]).query.to_q[:bq].should eq '(or helpfulness:123 helpfulness:456)'
+        query = clazz.search.where(:helpfulness, :any, [123, 456]).query.to_q[:bq]
+        expect(query).to match '(or helpfulness:123 helpfulness:456)'
       end
 
       it 'accepts a value as a string' do
-        clazz.search.where(helpfulness: '123').query.to_q[:bq].should =~ /helpfulness:123/
+        query = clazz.search.where(helpfulness: '123').query.to_q[:bq]
+        expect(query).to match /helpfulness:123/
       end
 
       [Object.new, nil, '123a'].each do |v|
@@ -112,45 +126,45 @@ describe Cloudsearchable::Query do
 
 
   it 'supports querying for any of several values of a field' do
-    clazz.search.where(:test_name, :any, %w{big small}).query.to_q[:bq].should include("(or test_name:'big' test_name:'small')")
+    expect(clazz.search.where(:test_name, :any, %w{big small}).query.to_q[:bq]).to include("(or test_name:'big' test_name:'small')")
   end
 
   it 'supports text method' do
     query = clazz.search.text('test').query.to_q[:q]
-    query.should =~ /test/
+    expect(query).to match /test/
   end
 
   it 'supports chaining text and where clauses together' do
     query = clazz.search.text('test').where(:helpfulness, :==, 123).query
-    query.to_q[:q].should  =~ /test/
-    query.to_q[:bq].should =~ /helpfulness:123/
+    expect(query.to_q[:q]).to  match /test/
+    expect(query.to_q[:bq]).to match /helpfulness:123/
   end
 
   it 'supports ordering with a rank expression' do
-    clazz.search.where(customer_id: 12345).order('-helpfulness').query.to_q[:rank].should eq '-helpfulness'
+    expect(clazz.search.where(customer_id: 12345).order('-helpfulness').query.to_q[:rank]).to eq '-helpfulness'
   end
 
   it 'supports limit' do
-    clazz.search.where(customer_id: 12345).limit(10).query.to_q[:size].should eq 10
+    expect(clazz.search.where(customer_id: 12345).limit(10).query.to_q[:size]).to eq 10
   end
 
   it 'has high default limit' do
-    clazz.search.where(customer_id: 12345).query.to_q[:size].should eq 100000
+    expect(clazz.search.where(customer_id: 12345).query.to_q[:size]).to eq 100000
   end
 
   it 'supports offset' do
-    clazz.search.where(customer_id: 12345).offset(100).query.to_q[:start].should eq 100
+    expect(clazz.search.where(customer_id: 12345).offset(100).query.to_q[:start]).to eq 100
   end
 
   context 'queries' do
     before(:each) do
-      clazz.cloudsearch_index.should_receive(:execute_query).and_return(cloudsearch_response)
+      allow(clazz.cloudsearch_index).to receive(:execute_query).and_return(cloudsearch_response)
     end
 
     context 'query warning' do
       before(:each) do
-        clazz.stub(:find).and_return([])
-        Cloudsearchable.logger.should_receive(:warn).with(/CS-InvalidFieldOrRankAliasInRankParameter/)
+        allow(clazz).to receive(:find).and_return([])
+        expect(Cloudsearchable.logger).to receive(:warn).with(/CS-InvalidFieldOrRankAliasInRankParameter/)
       end
 
       let(:query){clazz.search.where(customer_id: 12345).order("-adult")}
@@ -192,16 +206,16 @@ describe Cloudsearchable::Query do
       end
 
       it 'causes WarningInQueryResult exception' do
-        lambda{ query.to_a }.should raise_error(Cloudsearchable::WarningInQueryResult)
+        expect(lambda{ query.to_a }).to raise_error(Cloudsearchable::WarningInQueryResult)
       end
 
       it 'takes a :fatal_warnings option, and when set to false, does not raise' do
         sample_query = Cloudsearchable::QueryChain.new(double, fatal_warnings: false)
-        sample_query.instance_variable_get(:@fatal_warnings).should eq false
+        expect(sample_query.instance_variable_get(:@fatal_warnings)).to be false
 
         q = query
         q.query.instance_variable_set(:@fatal_warnings, false)
-        lambda{ q.to_a }.should_not raise_error
+        expect(lambda{ q.to_a }).not_to raise_error
       end
     end
 
@@ -238,14 +252,14 @@ describe Cloudsearchable::Query do
       end
 
       it 'materializes' do
-        clazz.should_receive(:find).with(["ANINSTANCEID"]).and_return([customer_id])
+        allow(clazz).to receive(:find).with(["ANINSTANCEID"]).and_return([customer_id])
         query = clazz.search.where(customer_id: 12345)
-        query.to_a.should == [customer_id]
+        expect(query.to_a).to eq [customer_id]
       end
 
       it 'materializes db results only once' do
         expected_results = [customer_id, other_customer_id]
-        clazz.should_receive(:find).once.and_return(expected_results)
+        allow(clazz).to receive(:find).once.and_return(expected_results)
 
         query = clazz.search.where(customer_id: 12345)
         query.materialize!
@@ -253,40 +267,40 @@ describe Cloudsearchable::Query do
       end
 
       it 'should not materialize if only asking for found_count' do
-        clazz.should_not_receive(:find)
+        expect(clazz).not_to receive(:find)
         clazz.search.where(customer_id: 12345).found_count
       end
 
       it 'supports each for multiple results' do
         expected_results = [customer_id, other_customer_id]
-        clazz.should_receive(:find).with(["ANINSTANCEID"]).and_return(expected_results)
+        expect(clazz).to receive(:find).with(["ANINSTANCEID"]).and_return(expected_results)
 
         results = clazz.search.where(customer_id: 12345).to_a
-        (0..results.length).each{ |i| results[i].should eq expected_results[i] }
+        (0..results.length).each{ |i| expect(results[i]).to eq expected_results[i] }
       end
 
       it 'supports each for single results' do
-        clazz.should_receive(:find).with(["ANINSTANCEID"]).and_return(customer_id)
+        expect(clazz).to receive(:find).with(["ANINSTANCEID"]).and_return(customer_id)
 
         results = clazz.search.where(customer_id: 12345).to_a
-        results.each{ |r| r.should eq customer_id }
+        results.each{ |r| expect(r).to eq customer_id }
       end
 
       it 'supports each for nil result' do
-        clazz.should_receive(:find).with(["ANINSTANCEID"]).and_return(nil)
+        expect(clazz).to receive(:find).with(["ANINSTANCEID"]).and_return(nil)
 
         results = clazz.search.where(customer_id: 12345).to_a
-        results.each{ |r| r.should_not be }
+        results.each{ |r| expect(r).not_to be }
       end
 
       it 'uses materialized method' do
-        clazz.should_receive(:another_find).with(["ANINSTANCEID"]).and_return(customer_id)
+        expect(clazz).to receive(:another_find).with(["ANINSTANCEID"]).and_return(customer_id)
         clazz.materialize_method :another_find
         clazz.search.where(customer_id: 12345).to_a
       end
 
       it 'returns the correct found count' do
-        clazz.search.where(customer_id: 12345).found_count.should == 11
+        expect(clazz.search.where(customer_id: 12345).found_count).to eq 11
       end
     end
 
@@ -335,7 +349,7 @@ describe Cloudsearchable::Query do
       end
 
       it 'does not raise an exception' do
-        clazz.should_receive(:find).with([]).and_return(nil)
+        expect(clazz).to receive(:find).with([]).and_return(nil)
         clazz.search.where(:customer_id, :!=, 'ABCDE')
         expect { clazz.search.where(:customer_id, :!=, 'ABCDE').to_a }.to_not raise_error
       end
