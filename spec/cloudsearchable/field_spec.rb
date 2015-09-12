@@ -2,6 +2,10 @@ require 'spec_helper'
 require 'ostruct'
 
 describe Cloudsearchable::Field do
+  before :all do
+    ENV['AWS_REGION'] = 'us-east-1'
+  end
+
   it 'has a name' do
     field = described_class.new 'fnord', :literal
     field.name.should eq(:fnord)

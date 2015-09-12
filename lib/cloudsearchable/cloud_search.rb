@@ -1,11 +1,11 @@
-require 'aws-sdk-v1'
+require 'aws-sdk'
 require 'json'
 
 module CloudSearch
   API_VERSION = "2011-02-01"
 
   def self.client
-    @client ||= AWS::CloudSearch::Client.new
+    @client ||= Aws::CloudSearch::Client.new
   end
 
   def self.client=(client)
