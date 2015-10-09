@@ -7,7 +7,6 @@ describe Cloudsearchable do
   it 'can describe an index that returns ids for the class type' do
     test_index = clazz.cloudsearch_index
     test_index.should be_kind_of(Cloudsearchable::Domain)
-    # test_index.fields.should have(4).items #3 explicit + 1 for the id of the object
     expect(test_index.fields.size).to eq(4)
   end
 
