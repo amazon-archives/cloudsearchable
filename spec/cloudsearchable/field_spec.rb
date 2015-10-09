@@ -2,6 +2,10 @@ require 'spec_helper'
 require 'ostruct'
 
 describe Cloudsearchable::Field do
+  before(:each) do
+    ENV['AWS_REGION'] = 'us-test-1'
+  end
+
   it 'has a name' do
     field = described_class.new 'fnord', :literal
     field.name.should eq(:fnord)
@@ -23,7 +27,7 @@ describe Cloudsearchable::Field do
     field = described_class.new('fnord', :literal, :search_enabled => true)
     CloudSearch.client.should_receive(:define_index_field) do |call|
       call[:domain_name].should eq(domain_name)
-      call[:index_field][:literal_options][:search_enabled].should be_true
+      call[:index_field][:literal_options][:search_enabled].should be_truthy
     end
     field.define_in_domain domain_name
   end

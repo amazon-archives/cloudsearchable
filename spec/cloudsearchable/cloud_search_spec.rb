@@ -28,7 +28,7 @@ describe CloudSearch do
   let(:success_response){ MockHTTPOK.new( {"status" => "success", "adds" => 1, "deletes" => 0}.to_json ) }
 
   it 'json parses the response' do
-    Net::HTTP.any_instance.stub(:start).and_return{success_response}
+    Net::HTTP.any_instance.stub(:start).and_return(success_response)
 
     response = described_class.post_sdf endpoint, sdf_document
     response.should eq JSON.parse success_response.body
@@ -36,7 +36,7 @@ describe CloudSearch do
 
   it 'triggers error! on response its no not a Net::HTTPSuccess' do
     response = MockHTTPBadRequest.new
-    Net::HTTP.any_instance.stub(:start).and_return{response}
+    Net::HTTP.any_instance.stub(:start).and_return(response)
 
     response.should_receive(:error!)
     described_class.post_sdf endpoint, sdf_document
