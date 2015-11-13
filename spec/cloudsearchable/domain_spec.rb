@@ -4,7 +4,7 @@ require 'test_classes/cloud_searchable_test_class'
 describe Cloudsearchable::Domain do
   before(:each) do
     fake_client = double('client')
-    CloudSearch.stub(:client).and_return(fake_client)
+    allow(CloudSearch).to receive(:client).and_return(fake_client)
   end
   
   #
@@ -15,7 +15,7 @@ describe Cloudsearchable::Domain do
   let(:needs_rebuild_domain) do
     described_class.new('nrb-index').tap do |dom|
       resp = describe_domain_response(dom.name)
-      CloudSearch.client.stub(:describe_domains).with(:domain_names => [dom.name]).
+      allow(CloudSearch.client).to receive(:describe_domains).with(:domain_names => [dom.name]).
         and_return(
           describe_domain_response(dom.name, :required_index_documents => true),
           describe_domain_response(dom.name, :processing => true),
@@ -27,26 +27,26 @@ describe Cloudsearchable::Domain do
   # A domain name named 'my-index'
   let(:domain) do
     described_class.new('my-index').tap do |dom|
-      CloudSearch.client.stub(:describe_domains).and_return(describe_domain_response(dom.name))
-      CloudSearch.client.stub(:describe_domains).with(:domain_names => [dom.name]).and_return(describe_domain_response(dom.name))
+      allow(CloudSearch.client).to receive(:describe_domains).and_return(describe_domain_response(dom.name))
+      allow(CloudSearch.client).to receive(:describe_domains).with(:domain_names => [dom.name]).and_return(describe_domain_response(dom.name))
     end
   end
 
   let(:empty_domain) do
     described_class.new('my-index').tap do |dom|
-      CloudSearch.client.stub(:describe_domains).and_return({})
+      allow(CloudSearch.client).to receive(:describe_domains).and_return({})
     end
   end
   
   it 'can be instantiated' do
     index = domain
-    index.name.should end_with('my-index')
+    expect(index.name).to end_with('my-index')
   end
 
   it 'can haz a literal field' do
     index = domain
     index.add_field(:literary, :literal) { nil }
-    index.fields[:literary].type.should eq(:literal)
+    expect(index.fields[:literary].type).to eq(:literal)
   end
 
   it 'can be initialized with a nested class' do
@@ -56,7 +56,7 @@ describe Cloudsearchable::Domain do
       end
     end
 
-    OuterClassForCloudSearch::InnerClass.cloudsearch_prefix.should match(/^[A-Za-z0-9_-]+$/)
+    expect(OuterClassForCloudSearch::InnerClass.cloudsearch_prefix).to match(/^[A-Za-z0-9_-]+$/)
     Object.instance_eval { remove_const :OuterClassForCloudSearch }
   end
   
@@ -70,11 +70,11 @@ describe Cloudsearchable::Domain do
     end
     
     it "should generate present fields" do
-      subject.addition_sdf(object, "id", 1)[:fields][:field_with_present_value].should == 42
+      expect(subject.addition_sdf(object, "id", 1)[:fields][:field_with_present_value]).to eq(42)
     end
     
     it "should not generate nil fields" do
-      subject.addition_sdf(object, "id", 1)[:fields][:field_with_nil_value].should be_nil
+      expect(subject.addition_sdf(object, "id", 1)[:fields][:field_with_nil_value]).to be_nil
     end
   end
 
@@ -88,18 +88,18 @@ describe Cloudsearchable::Domain do
   # on a class variable
   #
   it 'caches endpoints for multiple domains' do
-    domain.send(:search_endpoint).should_not eq(needs_rebuild_domain.send(:search_endpoint))
+    expect(domain.send(:search_endpoint)).not_to eq(needs_rebuild_domain.send(:search_endpoint))
   end
 
   it 'endpoint selected is based on the domain name' do
-    domain.send(:search_endpoint).should eq describe_domain_response(domain.name)[:domain_status_list][0][:search_service][:endpoint]
-    domain.send(:doc_endpoint).should    eq describe_domain_response(domain.name)[:domain_status_list][0][:doc_service][:endpoint]
+    expect(domain.send(:search_endpoint)).to eq describe_domain_response(domain.name)[:domain_status_list][0][:search_service][:endpoint]
+    expect(domain.send(:doc_endpoint)).to    eq describe_domain_response(domain.name)[:domain_status_list][0][:doc_service][:endpoint]
   end
   
   it 'sleeps, waiting for reindexing' do
-    CloudSearch.client.should_receive(:index_documents).with(:domain_name => needs_rebuild_domain.name)
-    CloudSearch.client.should_receive(:describe_domains).exactly(3).times
-    needs_rebuild_domain.apply_changes(3).should == true
+    expect(CloudSearch.client).to receive(:index_documents).with(:domain_name => needs_rebuild_domain.name)
+    expect(CloudSearch.client).to receive(:describe_domains).exactly(3).times
+    expect(needs_rebuild_domain.apply_changes(3)).to be true
   end
 
   protected

@@ -50,6 +50,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'aws-sdk', "~> 2"
 
   # testing dependencies
-  spec.add_development_dependency "rspec", '~> 2'
+  spec.add_development_dependency "rspec"
+  spec.add_development_dependency "rspec-collection_matchers"
   spec.add_development_dependency "activemodel"
 end

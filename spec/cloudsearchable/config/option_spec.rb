@@ -16,25 +16,25 @@ describe Cloudsearchable::Config::Options do
 
   it 'sets and gets' do
     subject.foo = 5
-    subject.foo.should eq 5
+    expect(subject.foo).to eq 5
   end
 
   it 'defaults' do
-    subject.warnings.should_not be_nil
-    subject.warnings.should eq subject.settings[:warnings]
+    expect(subject.warnings).not_to be_nil
+    expect(subject.warnings).to eq subject.settings[:warnings]
   end
 
   it 'resets option' do
     subject.timezone = "EST"
-    subject.timezone.should eq "EST"
+    expect(subject.timezone).to eq "EST"
     subject.reset_timezone
-    subject.timezone.should eq "PST"
+    expect(subject.timezone).to eq "PST"
   end
 
   it 'resets all options' do
     subject.foo = 5
     subject.reset
-    subject.foo.should eq nil
+    expect(subject.foo).to eq nil
   end
 
 end
