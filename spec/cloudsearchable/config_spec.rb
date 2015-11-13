@@ -6,10 +6,10 @@ describe Cloudsearchable::Config do
       config.domain_prefix = 'dev-llarue-'
     end
 
-    Cloudsearchable.configure.domain_prefix.should eq 'dev-llarue-'
+    expect(Cloudsearchable.configure.domain_prefix).to eq 'dev-llarue-'
   end
 
   it 'aliases configure to config' do
-    Cloudsearchable.config.domain_prefix.should eq Cloudsearchable.configure.domain_prefix
+    expect(Cloudsearchable.config.domain_prefix).to eq Cloudsearchable.configure.domain_prefix
   end
 end

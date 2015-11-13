@@ -27,8 +27,7 @@ module CloudSearch
     req.body = JSON.generate sdf_list
     req["Content-Type"] = "application/json"
 
-    http = Net::HTTP.new uri.host,uri.port
-    response = http.start{|http| http.request(req)}
+    response = Net::HTTP.start(uri.host, uri.port){|http| http.request(req)}
 
     if response.is_a? Net::HTTPSuccess
       JSON.parse response.body

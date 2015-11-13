@@ -1,5 +1,5 @@
 require 'rspec/core/rake_task'
-RSpec::Core::RakeTask.new('spec')
+RSpec::Core::RakeTask.new
 
 # make spec test the default task
 task :default => :spec
