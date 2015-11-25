@@ -6,7 +6,9 @@ require 'cloudsearchable/version'
 Gem::Specification.new do |spec|
   spec.name          = "cloudsearchable"
   spec.version       = Cloudsearchable::VERSION
-  spec.authors       = ["Lane LaRue"]
+  spec.authors       = ['Lane LaRue',
+                        'Philip White',
+                       ]
   spec.email         = ["llarue@amazon.com"]
   spec.description   = %q{ActiveRecord-like query interface for AWS Cloud Search}
   spec.summary       = %q{ActiveRecord-like query interface for AWS Cloud Search}
