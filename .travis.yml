@@ -1,8 +1,8 @@
 language: ruby
 rvm:
 - 1.9.3
-- 2.1.6
+- 2.1.7
 - 2.2.3
-- jruby-1.7.11
-- jruby-9.0.3.0
-- rbx-2.5.3
+- jruby-1.7.23
+- jruby-9.0.4.0
+- rbx-2.5.8
