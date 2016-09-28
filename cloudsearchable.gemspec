@@ -54,4 +54,5 @@ Gem::Specification.new do |spec|
   # testing dependencies
   spec.add_development_dependency "rspec", '~> 3'
   spec.add_development_dependency "activemodel"
+  spec.add_development_dependency "yard"
 end
